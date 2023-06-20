@@ -1,5 +1,4 @@
 /** @format */
-
 var mysql = require('mysql');
 
 //--------------- jwt -----------------
@@ -29,6 +28,7 @@ async function authentication(username, password) {
           { data: username, iat: Math.floor(Date.now() / 1000) - 30 },
           'jwt_secret'
         );
+        console.log('token : '+token);
         var tokenRole = jwt.sign(
           { dataRole: userRole, iat: Math.floor(Date.now() / 1000) - 30 },
           'jwt_secret_role'
