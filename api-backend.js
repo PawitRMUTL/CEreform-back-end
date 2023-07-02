@@ -4,9 +4,8 @@ const hapi = require('@hapi/hapi');
 //const H2o2 = require('@hapi/h2o2');
 const AuthBearer = require('hapi-auth-bearer-token');
 var express = require('express');
-const Joi = require('joi');
-const axios = require('axios');
-const FormData = require('form-data');
+const multer = require('multer');
+// const fileupload = require('express-fileupload');
 
 const AgentStatus = require('./respository/AgentStatus');
 const Inbound = require('./respository/Inbound');
@@ -16,6 +15,7 @@ const Satisfaction = require('./respository/Satisfaction');
 
 //---------------- Portal --------------------------------
 const Login = require('./respository/Portal/backend_login');
+const upload = require('./respository/Portal/uploadfile');
 
 const env = require('./env.js');
 
@@ -26,8 +26,8 @@ const webPort = 3280;
 
 //---------------- COOKIE --------------------------------
 const cookie = require('cookie-parser');
-
 var url = require('url');
+const { log } = require('console');
 
 //init Express
 var app = express();
@@ -46,6 +46,10 @@ app.use('/', router);
 
 //use cookieParser
 app.use(cookie());
+
+//use file with express
+// app.use(fileupload());
+// app.use(express.static('files'));
 
 //add middleware for static content
 app.use(express.static('static'));
@@ -159,6 +163,91 @@ const init = async () => {
       }
     },
   });
+  //API upload file pdf
+  server.route({
+    method: 'POST',
+    path: '/api/uploadfilePDF',
+    config: {
+      payload: {
+        multipart: true,
+        parse: true,
+        output: 'stream',
+        allow: ['multipart/form-data', 'application/pdf'], // Specify the allowed content type for the request
+        maxBytes: 10 * 1024 * 1024, // Set a maximum file size (optional)
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const file = request.payload['pdf-file'];
+        const owner = request.payload['owner'];
+        console.log('filename: ' + file.hapi.filename);
+        console.log('owner' + owner);
+
+        // console.log(request.payload);
+        // console.log('Hapi' + hapi);
+        const milliseconds = new Date().getTime();
+        const fileName = file.hapi.filename;
+        const filePath = `../Documenets/${milliseconds}-${fileName}`;
+
+        // Save the file to disk
+        const fs = require('fs');
+        const fileStream = fs.createWriteStream(filePath);
+        await new Promise((resolve, reject) => {
+          file.on('error', (err) => {
+            reject(err);
+          });
+          file.pipe(fileStream);
+          file.on('end', () => {
+            resolve();
+          });
+        });
+        const responsedata = await upload.upload_pdf.upload_pdf(
+          fileName,
+          milliseconds,
+          owner
+        );
+
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+  // const data = request.payload;
+
+  // if (!data.file) {
+  //   throw new Error('No file provided');
+  // }
+
+  // const file = data.file;
+  // const filename = file.hapi.filename;
+  // const contentType = file.hapi.headers['content-type'];
+
+  // const fileData = {
+  //   filename,
+  //   contentType,
+  //   data: file._data,
+  // };
+
+  // // Create a new document using the model and save it to the database
+  // const responsedata = await upload.upload_pdf.upload_pdf(fileData);
+
+  // // const responsedata = await upload.upload_pdf.upload_pdf(file);
+
+  // if (responsedata.error) {
+  //   return responsedata.errMessage;
+  // } else {
+  //   return responsedata;
+  // }
 
   //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
   server.route({

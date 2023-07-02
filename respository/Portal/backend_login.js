@@ -21,14 +21,14 @@ async function authentication(username, password) {
     console.log('Query1 is: ', Query);
     pool.query(Query, function (error, results) {
       // if (error) throw error;
-      if (results.length > 0) {
+      if (results.length != null) {
         const userRole = results[0].role;
         // token มีเวลา 1 ชั่วโมง
         var token = jwt.sign(
           { data: username, iat: Math.floor(Date.now() / 1000) - 30 },
           'jwt_secret'
         );
-        console.log('token : '+token);
+        // console.log('token : ' + token);
         var tokenRole = jwt.sign(
           { dataRole: userRole, iat: Math.floor(Date.now() / 1000) - 30 },
           'jwt_secret_role'
