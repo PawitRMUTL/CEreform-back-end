@@ -184,11 +184,8 @@ const init = async () => {
       try {
         const file = request.payload['pdf-file'];
         const owner = request.payload['owner'];
-        console.log('filename: ' + file.hapi.filename);
-        console.log('owner' + owner);
-
-        // console.log(request.payload);
-        // console.log('Hapi' + hapi);
+        const year = request.payload['year'];
+        const type = request.payload['type'];
         const milliseconds = new Date().getTime();
         const fileName = file.hapi.filename;
         const filePath = `../Documenets/${milliseconds}-${fileName}`;
@@ -208,7 +205,9 @@ const init = async () => {
         const responsedata = await upload.upload_pdf.upload_pdf(
           fileName,
           milliseconds,
-          owner
+          owner,
+          year,
+          type
         );
 
         if (responsedata.error) {
@@ -222,115 +221,69 @@ const init = async () => {
       }
     },
   });
-  // const data = request.payload;
 
-  // if (!data.file) {
-  //   throw new Error('No file provided');
-  // }
-
-  // const file = data.file;
-  // const filename = file.hapi.filename;
-  // const contentType = file.hapi.headers['content-type'];
-
-  // const fileData = {
-  //   filename,
-  //   contentType,
-  //   data: file._data,
-  // };
-
-  // // Create a new document using the model and save it to the database
-  // const responsedata = await upload.upload_pdf.upload_pdf(fileData);
-
-  // // const responsedata = await upload.upload_pdf.upload_pdf(file);
-
-  // if (responsedata.error) {
-  //   return responsedata.errMessage;
-  // } else {
-  //   return responsedata;
-  // }
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
+  //API
   server.route({
     method: 'GET',
-    path: '/api/v1/agents',
-    handler: async function (request, reply) {
-      var param = request.query;
-      const agent_code = param.agent_code;
-
+    path: '/api/GetfilePFD',
+    handler: async function (reply) {
       try {
-        const responsedata =
-          await OnlineAgent.OnlineAgentRepo.getOnlineAgentByAgentCode(
-            agent_code
-          );
-        if (responsedata.error) {
-          return responsedata.errMessage;
+        const responseData = await upload.upload_pdf.read_file();
+        // console.log('ww' + responseData);
+        // const pdfData = responseData.toString('base64');
+        // console.log('pdfData : ' + pdfData);
+        if (responseData.error) {
+          return responseData.errMessage;
         } else {
-          return responsedata;
+          return responseData;
         }
-      } catch (err) {
+        // return reply;
+        // .response(pdfData)
+        // .type('application/pdf')
+        // .header('content-disposition', 'inline; filename="file.pdf"');
+      } catch (error) {
         server.log(['error', 'home'], err);
-        return err;
+        throw err; // Throw the error to indicate a failure
       }
     },
   });
 
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'POST',
-    path: '/api/v1/agent',
-    config: {
-      payload: {
-        multipart: true,
-        //output: 'stream',
-        //parse: true,
-        //allow: ['application/json', 'multipart/form-data',  'application/x-www-form-urlencoded'],
-        //timeout: false
-      },
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const { agent_code, IsLogin } = request.payload;
-        //console.log('HAPI ', request.payload);
-        //console.log('agent_code is: ', agent_code);
-        //console.log('IsLogin is: ', IsLogin);
-
-        if (IsLogin === '1') {
-          const responsedata =
-            await OnlineAgent.OnlineAgentRepo.insertOnlineAgent(agent_code);
-          if (responsedata.error) {
-            return responsedata.errMessage;
-          } else {
-            return responsedata;
-          }
-        } else if (IsLogin === '0') {
-          const responsedata =
-            await OnlineAgent.OnlineAgentRepo.deleteOnlineAgent(agent_code);
-          if (responsedata.error) {
-            return responsedata.errMessage;
-          } else {
-            return responsedata;
-          }
-        } else {
-          return {
-            statusCode: 400,
-            returnCode: 13,
-            message: 'Invalid IsLogin Code',
-          };
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
+  //API: ReadData
+  // server.route({
+  //   method: 'POST',
+  //   path: '/api/GetfilePFD',
+  //   config: {
+  //     payload: {
+  //       multipart: true,
+  //       //output: 'stream',
+  //       //parse: true,
+  //       allow: [
+  //         'application/json',
+  //         'multipart/form-data',
+  //         'application/x-www-form-urlencoded',
+  //         'application/pdf',
+  //       ],
+  //       //timeout: false
+  //     },
+  //     cors: {
+  //       origin: ['*'],
+  //       additionalHeaders: ['cache-control', 'x-requested-width'],
+  //     },
+  //   },
+  //   handler: async function () {
+  //     try {
+  //       const responsedata = await upload.Readfle.Readfile;
+  //       if (responsedata.error) {
+  //         return responsedata.errMessage;
+  //       } else {
+  //         return responsedata;
+  //       }
+  //     } catch (err) {
+  //       server.log(['error', 'home'], err);
+  //       return err;
+  //     }
+  //   },
+  // });
 
   //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
   server.route({
