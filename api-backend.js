@@ -222,25 +222,18 @@ const init = async () => {
     },
   });
 
-  //API
+  //API GetfilePDF
   server.route({
     method: 'GET',
     path: '/api/GetfilePFD',
     handler: async function (reply) {
       try {
         const responseData = await upload.upload_pdf.read_file();
-        // console.log('ww' + responseData);
-        // const pdfData = responseData.toString('base64');
-        // console.log('pdfData : ' + pdfData);
         if (responseData.error) {
           return responseData.errMessage;
         } else {
           return responseData;
         }
-        // return reply;
-        // .response(pdfData)
-        // .type('application/pdf')
-        // .header('content-disposition', 'inline; filename="file.pdf"');
       } catch (error) {
         server.log(['error', 'home'], err);
         throw err; // Throw the error to indicate a failure
@@ -248,39 +241,38 @@ const init = async () => {
     },
   });
 
-  //API: ReadData
+  //API: ReadData ยังใช่ไม่ได้
   // server.route({
-  //   method: 'POST',
-  //   path: '/api/GetfilePFD',
-  //   config: {
-  //     payload: {
-  //       multipart: true,
-  //       //output: 'stream',
-  //       //parse: true,
-  //       allow: [
-  //         'application/json',
-  //         'multipart/form-data',
-  //         'application/x-www-form-urlencoded',
-  //         'application/pdf',
-  //       ],
-  //       //timeout: false
-  //     },
-  //     cors: {
-  //       origin: ['*'],
-  //       additionalHeaders: ['cache-control', 'x-requested-width'],
-  //     },
-  //   },
-  //   handler: async function () {
+  //   method: 'GET',
+  //   path: '/api/downloadfilePFD',
+  //   handler: async function (request, h) {
+  //     const { id, year } = request.query;
   //     try {
-  //       const responsedata = await upload.Readfle.Readfile;
-  //       if (responsedata.error) {
-  //         return responsedata.errMessage;
+  //       const responsedata = await upload.upload_pdf.get_filePFD(id, year);
+  //       const results = responsedata;
+
+  //       if (results && results.length > 0) {
+  //         const fileData = results[0].file_content;
+  //         const filename = results[0].file_name;
+
+  //         if (fileData) {
+  //           const buffer = Buffer.from(fileData, 'binary');
+
+  //           // Create a temporary file on the server
+  //           const filePath = `../../../Documenets/${filename}`;
+  //           fs.writeFileSync(filePath, buffer);
+
+  //           // Send the file as a response with appropriate headers
+  //           return h.file(filePath, { filename });
+  //         } else {
+  //           return h.response('File content not found').code(404);
+  //         }
   //       } else {
-  //         return responsedata;
+  //         return h.response('File not found').code(404);
   //       }
   //     } catch (err) {
-  //       server.log(['error', 'home'], err);
-  //       return err;
+  //       console.error('Error:', err);
+  //       return h.response('Internal Server Error').code(500);
   //     }
   //   },
   // });
