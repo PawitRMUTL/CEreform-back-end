@@ -16,7 +16,7 @@ const Satisfaction = require('./respository/Satisfaction');
 //---------------- Portal --------------------------------
 const Login = require('./respository/Portal/backend_login');
 const upload = require('./respository/Portal/uploadfile');
-
+const from = require('./respository/Portal/Fromcontent');
 const env = require('./env.js');
 
 //---------------- Websocket -----------------------------
@@ -235,6 +235,68 @@ const init = async () => {
           return responseData;
         }
       } catch (error) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+
+  //API allPost
+  server.route({
+    method: 'GET',
+    path: '/api/allPost',
+    handler: async function () {
+      try {
+        const [rows] = await from.Post.allPost();
+        return res.json({ success: true, listall: rows });
+      } catch (error) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+  // API uploadmutipleimage max 4 form front-end
+  server.route({
+    method: 'POST',
+    path: '/api/uploadimageNew',
+    config: {
+      payload: {
+        multipart: true,
+        parse: true,
+        output: 'stream',
+        allow: ['multipart/form-data', 'application/pdf'], // Specify the allowed content type for the request
+        maxBytes: 10 * 1024 * 1024, // Set a maximum file size (optional)
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, h) {
+      try {
+        const fs = require('fs');
+        let responsedata = [null];
+        const ownerid = request.payload['id_owner '];
+        // console.log('Payload:', request.payload);
+        for (const [fieldname, file] of Object.entries(request.payload)) {
+          if (file && file.hapi && file.hapi.filename) {
+            const filename = file.hapi.filename;
+            const data = file._data;
+            // console.log('filename:', filename, 'data length:', data.length);
+            responsedata = upload.upload_pdf.upload_image(
+              data,
+              filename,
+              ownerid
+            );
+          } else {
+            console.log('Invalid file object:', file);
+          }
+        }
+        // Return a response after successful image upload
+        return h.response(
+          'Images uploaded and inserted into the database successfully.'
+        );
+      } catch (err) {
         server.log(['error', 'home'], err);
         throw err; // Throw the error to indicate a failure
       }
