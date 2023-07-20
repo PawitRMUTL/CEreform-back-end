@@ -5,7 +5,7 @@ const hapi = require('@hapi/hapi');
 const AuthBearer = require('hapi-auth-bearer-token');
 var express = require('express');
 const multer = require('multer');
-// const fileupload = require('express-fileupload');
+const cors = require('cors');
 
 const AgentStatus = require('./respository/AgentStatus');
 const Inbound = require('./respository/Inbound');
@@ -18,7 +18,6 @@ const Login = require('./respository/Portal/backend_login');
 const upload = require('./respository/Portal/uploadfile');
 const from = require('./respository/Portal/Fromcontent');
 const env = require('./env.js');
-
 //---------------- Websocket -----------------------------
 const hapiPort = 3200;
 const webSocketPort = 3201;
@@ -33,7 +32,12 @@ const { log } = require('console');
 var app = express();
 //init Express Router
 var router = express.Router();
+// use cors
+const corsOptions = {
+  origin: '*',
+};
 
+app.use(cors(corsOptions));
 //REST route for GET /status
 router.get('/status', function (req, res) {
   res.json({
@@ -202,7 +206,7 @@ const init = async () => {
             resolve();
           });
         });
-        const responsedata = await upload.upload_pdf.upload_pdf(
+        const responsedata = await upload.uploadfile.upload_pdf(
           fileName,
           milliseconds,
           owner,
@@ -228,7 +232,7 @@ const init = async () => {
     path: '/api/GetfilePFD',
     handler: async function (reply) {
       try {
-        const responseData = await upload.upload_pdf.read_file();
+        const responseData = await upload.uploadfile.read_file();
         if (responseData.error) {
           return responseData.errMessage;
         } else {
@@ -283,7 +287,7 @@ const init = async () => {
             const filename = file.hapi.filename;
             const data = file._data;
             // console.log('filename:', filename, 'data length:', data.length);
-            responsedata = upload.upload_pdf.upload_image(
+            responsedata = upload.uploadfile.upload_image(
               data,
               filename,
               ownerid
@@ -303,352 +307,42 @@ const init = async () => {
     },
   });
 
-  //API: ReadData ยังใช่ไม่ได้
-  // server.route({
-  //   method: 'GET',
-  //   path: '/api/downloadfilePFD',
-  //   handler: async function (request, h) {
-  //     const { id, year } = request.query;
-  //     try {
-  //       const responsedata = await upload.upload_pdf.get_filePFD(id, year);
-  //       const results = responsedata;
-
-  //       if (results && results.length > 0) {
-  //         const fileData = results[0].file_content;
-  //         const filename = results[0].file_name;
-
-  //         if (fileData) {
-  //           const buffer = Buffer.from(fileData, 'binary');
-
-  //           // Create a temporary file on the server
-  //           const filePath = `../../../Documenets/${filename}`;
-  //           fs.writeFileSync(filePath, buffer);
-
-  //           // Send the file as a response with appropriate headers
-  //           return h.file(filePath, { filename });
-  //         } else {
-  //           return h.response('File content not found').code(404);
-  //         }
-  //       } else {
-  //         return h.response('File not found').code(404);
-  //       }
-  //     } catch (err) {
-  //       console.error('Error:', err);
-  //       return h.response('Internal Server Error').code(500);
-  //     }
-  //   },
-  // });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'POST',
-    path: '/api/v1/agentstatus',
-    config: {
-      payload: {
-        multipart: true,
-        //output: 'stream',
-        //parse: true,
-        //allow: ['application/json', 'multipart/form-data',  'application/x-www-form-urlencoded'],
-        //timeout: false
-      },
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const { agent_code, agent_status } = request.payload;
-
-        const responsedata = await AgentStatus.AgentStatusRepo.setAgentStatus(
-          agent_code,
-          agent_status
-        );
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          return responsedata;
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
+  //API GetfilePDF
   server.route({
     method: 'GET',
-    path: '/api/v1/agentbyteam',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      var param = request.query;
-      const team_code = param.team_code;
-
+    path: '/api/GetNewlist',
+    handler: async function (reply) {
       try {
-        const responsedata = await AgentStatus.AgentStatusRepo.getAgentByTeam(
-          team_code
-        );
-        if (responsedata.error) {
-          return responsedata.errMessage;
+        const responseData = await upload.uploadfile.read_Newlist();
+        // console.log('responseData is ', responseData);
+
+        if (responseData.error) {
+          return responseData.errMessage;
         } else {
-          return responsedata;
+          return responseData;
         }
-      } catch (err) {
+      } catch (error) {
         server.log(['error', 'home'], err);
-        return err;
+        throw err; // Throw the error to indicate a failure
       }
     },
   });
 
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'POST',
-    path: '/api/v1/outbound',
-    config: {
-      payload: {
-        multipart: true,
-        //output: 'stream',
-        //parse: true,
-        //allow: ['application/json', 'multipart/form-data',  'application/x-www-form-urlencoded'],
-        //timeout: false
-      },
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const { agent_code, customer_number } = request.payload;
-
-        const responsedata = await Outbound.OutboundRepo.setOutboundCall(
-          agent_code,
-          customer_number
-        );
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          return responsedata;
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
   server.route({
     method: 'GET',
-    path: '/api/v1/getoutbound',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-      // validate: {
-      //   params: Joi.object({
-      //     name: Joi.string().alphanum().required()
-      //   })
-      // }
-    },
-    handler: async function (request, reply) {
-      var param = request.query;
-      const uuid = param.uuid;
+    path: '/api/Readimagenew',
 
+    handler: async function (request, h) {
       try {
-        const responsedata = await Outbound.OutboundRepo.getOutboundCall(uuid);
-        if (responsedata.error) {
-          return responsedata.errMessage;
+        const responseData = await upload.uploadfile.read_imagelist(); // Use 'uploadfile' instead of 'upload.uploadfile'
+        if (responseData.error) {
+          return responseData.errMessage;
         } else {
-          return responsedata;
+          return responseData;
         }
       } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'GET',
-    path: '/api/v1/inbound',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      var param = request.query;
-      const customer_number = param.customer_number;
-
-      try {
-        //const { agent_code, customer_number } = request.payload;
-
-        console.log('customer_number : ', customer_number);
-
-        const responsedata = await Inbound.InboundRepo.setInboundCall(
-          customer_number
-        );
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          //return responsedata;
-
-          console.log('responsedata: ', responsedata);
-
-          //http://10.22.192.36:8080/buzz_power/backend/web/telephony/callin/get-call-history?
-          //caller_id=0910941529&call_refer_id=1111&ivr_number=1
-
-          const caller_id = responsedata.inbound_customer_number;
-          const ivr_number = responsedata.ivr_number;
-          const call_refer_id = responsedata.inbound_callref;
-
-          if (env == 'development') {
-            //-- For POC --
-            return responsedata;
-            //return reply.redirect('http://128.199.188.223:3200/agents?caller_id=' + caller_id + '&call_refer_id=' + call_refer_id + '&ivr_number=' + ivr_number);
-          } else if (env == 'production') {
-            //-- For PRODUCTION ---
-            return reply.redirect(
-              'http://10.22.192.36:8080/buzz_power/backend/web/telephony/callin/get-call-history?caller_id=' +
-                caller_id +
-                '&call_refer_id=' +
-                call_refer_id +
-                '&ivr_number=' +
-                ivr_number
-            );
-          }
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'POST',
-    path: '/api/v1/setavgwaitingtime',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const responsedata = await Inbound.InboundRepo.setAvgWaitingTime();
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          console.log('responsedata: ', responsedata);
-          return responsedata;
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'GET',
-    path: '/api/v1/getsatisfactionscore',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const responsedata =
-          await Satisfaction.SatisfactionRepo.getAverageSatisfactionScore();
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          //return responsedata;
-
-          console.log('responsedata: ', responsedata);
-
-          return responsedata;
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
-      }
-    },
-  });
-
-  //API: http://localhost:3000/getOnlineAgentByAgentCode?agentcode=08926
-  server.route({
-    method: 'GET',
-    path: '/api/v1/getaveragewaitingtime',
-    config: {
-      // auth: {
-      //     strategy: 'jwt-strict',
-      //     mode: 'required'
-      // },
-      cors: {
-        origin: ['*'],
-        additionalHeaders: ['cache-control', 'x-requested-width'],
-      },
-    },
-    handler: async function (request, reply) {
-      try {
-        const responsedata =
-          await Satisfaction.SatisfactionRepo.getAverageWaitingTime();
-        if (responsedata.error) {
-          return responsedata.errMessage;
-        } else {
-          //return responsedata;
-
-          console.log('responsedata: ', responsedata);
-
-          return responsedata;
-        }
-      } catch (err) {
-        server.log(['error', 'home'], err);
-        return err;
+        console.error('Error reading image from the database:', err);
+        throw err;
       }
     },
   });
