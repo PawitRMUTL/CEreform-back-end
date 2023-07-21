@@ -45,17 +45,17 @@ async function readfile() {
     });
   });
 }
-async function upload_image(data, filename, ownerid) {
+async function upload_image(filename, ownerid) {
   const unique_id = uuidv4();
   const pool = mysql.createPool(config);
   // console.log('data1 is', data);
 
   return new Promise((resolve, reject) => {
     // Convert the buffer to a Base64 encoded string
-    const dataString = data.toString('base64');
+    // const dataString = data.toString('base64');
     // console.log('data is ', dataString, 'filename', filename);
     pool.query(
-      `INSERT INTO newspaper_image( data_file,filename , ownerid) VALUES ("${dataString}","${filename}","${ownerid}")`,
+      `INSERT INTO newspaper_image( filename , ownerid) VALUES ("${filename}","${ownerid}")`,
       function (error, results) {
         if (error) {
           console.error('Error inserting data:', error);
@@ -71,13 +71,15 @@ async function upload_image(data, filename, ownerid) {
 }
 
 async function read_Newlist() {
-  var Query;
+  var Query, Query2;
   const pool = mysql.createPool(config);
 
   return new Promise((resolve, reject) => {
     Query = 'SELECT * FROM newspaper';
-    console.log('Query is: ', Query);
-    pool.query(Query, function (error, results) {
+    Query2 =
+      'SELECT * FROM newspaper INNER JOIN newspaper_image ON newspaper.news_id = newspaper_image.ownerid WHERE newspaper_image.imageMain = 1 ';
+    console.log('Query is: ', Query2);
+    pool.query(Query2, function (error, results) {
       if (error) {
         console.error('Error retrieving data:', error);
         return reject(error);
@@ -102,7 +104,7 @@ async function read_imagelist() {
         return reject(error);
       } else {
         if (results.length > 0) {
-          const imageData = results[0].data_file;
+          const imageData = results[8].data_file;
           console.log('ReadIamgeNew successful');
           // console.log(imageData);
           const txt = Buffer.from(imageData, 'base64').toString('ascii');
@@ -114,11 +116,33 @@ async function read_imagelist() {
     });
   });
 }
+async function update_image(data, ownerid) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
 
+  return new Promise((resolve, reject) => {
+    const dataString = data.toString('base64');
+    pool.query(
+      `UPDATE newspaper SET imagetitle = "${dataString}" WHERE news_id = "${ownerid}"`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Upload imagetilte successfully');
+          // console.log(resolve);
+          resolve(results);
+        }
+      }
+    );
+  });
+}
 module.exports.uploadfile = {
   read_imagelist: read_imagelist,
   read_Newlist: read_Newlist,
   upload_pdf: upload_pdf,
   read_file: readfile,
   upload_image: upload_image,
+  update_image: update_image,
 };
