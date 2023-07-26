@@ -130,7 +130,7 @@ async function update_image(data, ownerid) {
           console.error('Error inserting data:', error);
           return reject(error);
         } else {
-          console.log('Upload imagetilte successfully');
+          console.log('Upload News_detail successfully');
           // console.log(resolve);
           resolve(results);
         }
@@ -138,6 +138,72 @@ async function update_image(data, ownerid) {
     );
   });
 }
+async function read_NewDetaill(id) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
+
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `SELECT * FROM newspaper WHERE news_id = '${id}'`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Read News_detail successfully');
+          // console.log(results);
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
+async function read_ImageNewlist(id) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
+
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `SELECT * FROM newspaper_image WHERE ownerid = '${id}'`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Read Image_News successfully');
+          // console.log(results);
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
+async function InsertViewNews(valuenew) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
+
+  return new Promise((resolve, reject) => {
+    pool.query(
+      // `SELECT * FROM newspaper_image WHERE ownerid = '${id}'`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Read Image_News successfully');
+          // console.log(results);
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
 module.exports.uploadfile = {
   read_imagelist: read_imagelist,
   read_Newlist: read_Newlist,
@@ -145,4 +211,6 @@ module.exports.uploadfile = {
   read_file: readfile,
   upload_image: upload_image,
   update_image: update_image,
+  read_NewDetaill: read_NewDetaill,
+  read_ImageNewlist: read_ImageNewlist,
 };

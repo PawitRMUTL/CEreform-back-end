@@ -16,7 +16,7 @@ const Satisfaction = require('./respository/Satisfaction');
 //---------------- Portal --------------------------------
 const Login = require('./respository/Portal/backend_login');
 const upload = require('./respository/Portal/uploadfile');
-const from = require('./respository/Portal/Fromcontent');
+const teacher = require('./respository/Portal/teacher');
 const env = require('./env.js');
 //---------------- Websocket -----------------------------
 const hapiPort = 3200;
@@ -245,20 +245,6 @@ const init = async () => {
     },
   });
 
-  //API allPost
-  server.route({
-    method: 'GET',
-    path: '/api/allPost',
-    handler: async function () {
-      try {
-        const [rows] = await from.Post.allPost();
-        return res.json({ success: true, listall: rows });
-      } catch (error) {
-        server.log(['error', 'home'], err);
-        throw err; // Throw the error to indicate a failure
-      }
-    },
-  });
   // API uploadmutipleimage max 4 form front-end
   server.route({
     method: 'POST',
@@ -287,7 +273,7 @@ const init = async () => {
             const filename = file.hapi.filename;
             const data = file._data;
             // Save the image file to disk (you can choose your desired destination)
-            const destinationPath = `../../../CEreform-frond-end/public/ImageNew/${filename}`;
+            const destinationPath = `../../../CEreform-frond-end/app/containers/ImageNew/${filename}`;
             const fileStream = fs.createWriteStream(destinationPath);
             fileStream.write(data);
             fileStream.end();
@@ -386,6 +372,126 @@ const init = async () => {
       } catch (err) {
         server.log(['error', 'home'], err);
         throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+
+  //READ NEWS LIST
+  server.route({
+    method: 'POST',
+    path: '/api/listnews_detail',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        const responsedata = await upload.uploadfile.read_NewDetaill(id);
+        return responsedata;
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+
+  //API GetReadfileimage
+  server.route({
+    method: 'POST',
+    path: '/api/Getimagesnews',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        // console.log('id is ', id);
+        const responseData = await upload.uploadfile.read_ImageNewlist(id);
+        return responseData;
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/InsertViewNew',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { valuenew } = request.payload;
+        // console.log('id is ', id);
+        const responseData = await upload.uploadfile.InsertViewNews(valuenew);
+        return responseData;
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  //API TEACHER LIST
+  server.route({
+    method: 'GET',
+    path: '/api/Teacher_list',
+    handler: async function (reply) {
+      try {
+        const responseData = await teacher.teacher_detaill.thecher_list();
+        if (responseData.error) {
+          return responseData.errMessage;
+        } else {
+          return responseData;
+        }
+      } catch (error) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+
+  //API ReadTeacher By ID
+  server.route({
+    method: 'POST',
+    path: '/api/ReadTeacherByID',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        // console.log('id is ', id);
+        const responseData = await teacher.teacher_detaill.thecher_listById(id);
+        return responseData;
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
       }
     },
   });

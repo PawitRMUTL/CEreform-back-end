@@ -85,9 +85,9 @@ console.log('Running Environment: ' + env);
 
 var init = function init() {
   var server;
-  return regeneratorRuntime.async(function init$(_context9) {
+  return regeneratorRuntime.async(function init$(_context11) {
     while (1) {
-      switch (_context9.prev = _context9.next) {
+      switch (_context11.prev = _context11.next) {
         case 0:
           server = hapi.Server({
             port: hapiPort,
@@ -411,7 +411,7 @@ var init = function init() {
               }
             },
             handler: function handler(request, h) {
-              var fs, responsedata, ownerid, _i2, _Object$entries, _Object$entries$_i, fieldname, file, filename, data;
+              var fs, responsedata, ownerid, _i2, _Object$entries, _Object$entries$_i, fieldname, file, filename, data, destinationPath, fileStream;
 
               return regeneratorRuntime.async(function handler$(_context6) {
                 while (1) {
@@ -427,9 +427,14 @@ var init = function init() {
 
                         if (file && file.hapi && file.hapi.filename) {
                           filename = file.hapi.filename;
-                          data = file._data; // console.log('filename:', filename, 'data length:', data.length);
+                          data = file._data; // Save the image file to disk (you can choose your desired destination)
 
-                          responsedata = upload.uploadfile.upload_image(data, filename, ownerid);
+                          destinationPath = "../../../CEreform-frond-end/app/containers/ImageNew/".concat(filename);
+                          fileStream = fs.createWriteStream(destinationPath);
+                          fileStream.write(data);
+                          fileStream.end();
+                          console.log('filename:', filename);
+                          responsedata = upload.uploadfile.upload_image(filename, ownerid);
                         } else {
                           console.log('Invalid file object:', file);
                         }
@@ -541,16 +546,132 @@ var init = function init() {
                 }
               }, null, null, [[0, 11]]);
             }
+          }); //API UPDATE IMAGE
+
+          server.route({
+            method: 'POST',
+            path: '/api/Updateimage',
+            config: {
+              payload: {
+                multipart: true,
+                parse: true,
+                output: 'stream',
+                allow: ['multipart/form-data', 'application/pdf'],
+                // Specify the allowed content type for the request
+                maxBytes: 10 * 1024 * 1024 // Set a maximum file size (optional)
+
+              },
+              cors: {
+                origin: ['*'],
+                additionalHeaders: ['cache-control', 'x-requested-width']
+              }
+            },
+            handler: function handler(request, h) {
+              var fs, responsedata, ownerid, _i3, _Object$entries2, _Object$entries2$_i, fieldname, file, data;
+
+              return regeneratorRuntime.async(function handler$(_context9) {
+                while (1) {
+                  switch (_context9.prev = _context9.next) {
+                    case 0:
+                      _context9.prev = 0;
+                      fs = require('fs');
+                      responsedata = [null];
+                      ownerid = request.payload['id_owner ']; // console.log('Payload:', request.payload);
+
+                      for (_i3 = 0, _Object$entries2 = Object.entries(request.payload); _i3 < _Object$entries2.length; _i3++) {
+                        _Object$entries2$_i = _slicedToArray(_Object$entries2[_i3], 2), fieldname = _Object$entries2$_i[0], file = _Object$entries2$_i[1];
+
+                        if (file && file.hapi && file.hapi.filename) {
+                          data = file._data;
+                          responsedata = upload.uploadfile.update_image(data, ownerid);
+                          console.log('OK !!');
+                        } else {
+                          console.log('Invalid file object:', file);
+                        }
+                      } // Return a response after successful image upload
+
+
+                      return _context9.abrupt("return", h.response('Images uploaded and inserted into the database successfully.'));
+
+                    case 8:
+                      _context9.prev = 8;
+                      _context9.t0 = _context9["catch"](0);
+                      server.log(['error', 'home'], _context9.t0);
+                      throw _context9.t0;
+
+                    case 12:
+                    case "end":
+                      return _context9.stop();
+                  }
+                }
+              }, null, null, [[0, 8]]);
+            }
+          }); //READ NEWS LIST
+
+          server.route({
+            method: 'POST',
+            path: '/api/ListNew_Detail',
+            config: {
+              payload: {
+                multipart: true
+              },
+              cors: {
+                origin: ['*'],
+                additionalHeaders: ['cache-control', 'x-requested-width']
+              }
+            },
+            handler: function handler(reply, request) {
+              var id_news, responseData;
+              return regeneratorRuntime.async(function handler$(_context10) {
+                while (1) {
+                  switch (_context10.prev = _context10.next) {
+                    case 0:
+                      id_news = request.payload['id'];
+                      console.log(id_news);
+                      _context10.prev = 2;
+                      _context10.next = 5;
+                      return regeneratorRuntime.awrap(upload.uploadfile.read_NewDetaill(id_news));
+
+                    case 5:
+                      responseData = _context10.sent;
+
+                      if (!responseData.error) {
+                        _context10.next = 10;
+                        break;
+                      }
+
+                      return _context10.abrupt("return", responseData.errMessage);
+
+                    case 10:
+                      return _context10.abrupt("return", responseData);
+
+                    case 11:
+                      _context10.next = 17;
+                      break;
+
+                    case 13:
+                      _context10.prev = 13;
+                      _context10.t0 = _context10["catch"](2);
+                      server.log(['error', 'home'], err);
+                      throw err;
+
+                    case 17:
+                    case "end":
+                      return _context10.stop();
+                  }
+                }
+              }, null, null, [[2, 13]]);
+            }
           });
-          _context9.next = 12;
+          _context11.next = 14;
           return regeneratorRuntime.awrap(server.start());
 
-        case 12:
+        case 14:
           console.log('Server running on %s', server.info.uri);
 
-        case 13:
+        case 15:
         case "end":
-          return _context9.stop();
+          return _context11.stop();
       }
     }
   });
