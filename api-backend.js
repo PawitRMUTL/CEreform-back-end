@@ -487,7 +487,8 @@ const init = async () => {
       try {
         const { id } = request.payload;
         // console.log('id is ', id);
-        const responseData = await teacher.teacher_detaill.thecher_listById(id);
+        const responseData =
+          await teacher.teacher_detaill.T_Read_thecher_listById(id);
         return responseData;
       } catch (err) {
         server.log(['error', 'home'], err);
