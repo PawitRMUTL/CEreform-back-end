@@ -58,7 +58,7 @@ async function T_Read_thecher_listById(id) {
   return new Promise((resolve, reject) => {
     pool.query(
       `SELECT * FROM biographical_teacher INNER JOIN education_teacher ON  biographical_teacher.teacher_id = education_teacher.owner_id 
-  INNER JOIN subject_teacher ON   biographical_teacher.teacher_id = subject_teacher.subject_id WHERE biographical_teacher.teacher_id = "${id}"`,
+  INNER JOIN subject_teacher ON   biographical_teacher.teacher_id = subject_teacher.subject_id  WHERE biographical_teacher.teacher_id = "${id}" ORDER BY education_teacher.graduates_years ASC`,
       function (error, results) {
         if (error) {
           console.error('Error inserting data:', error);
