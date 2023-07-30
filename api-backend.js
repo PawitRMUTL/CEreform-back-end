@@ -167,6 +167,38 @@ const init = async () => {
       }
     },
   });
+  // API READ firstname student POST
+  server.route({
+    method: 'POST',
+    path: '/api/ReadStudent',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { username } = request.payload;
+        const responsedata = await Login.authentication.Read_Frist_StudentByUsername(
+          username,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+
   //API upload file pdf
   server.route({
     method: 'POST',
