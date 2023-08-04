@@ -83,31 +83,7 @@ const init = async () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
     },
   });
-  // API  TEST !! GET
-  // server.route({
-  //   method: 'GET',
-  //   path: '/api/authentication',
-  //   handler: async function (request, reply) {
-  //     var param = request.query;
-  //     const { username, password } = param;
-  //     try {
-  //       const responsedata = await Login.authentication.authentication(
-  //         username,
-  //         password
-  //       );
-  //       if (responsedata.error) {
-  //         return responsedata.errMessage;
-  //       } else {
-  //         return responsedata;
-  //       }
-  //     } catch (err) {
-  //       server.log(['error', 'home'], err);
-  //       return err;
-  //     }
-  //   },
-  // });
-
-  // API SENT FROM LOGIN !!POST
+  // API SENT FROM LOGIN !!POST STUDENT
   server.route({
     method: 'POST',
     path: '/api/authentication',
@@ -125,7 +101,7 @@ const init = async () => {
         const { username, password } = request.payload;
         const responsedata = await Login.authentication.authentication(
           username,
-          password
+          password,
         );
         if (responsedata.error) {
           return responsedata.errMessage;
@@ -139,7 +115,38 @@ const init = async () => {
       }
     },
   });
-
+  // API SENT FROM LOGIN !!POST TEACHER
+  server.route({
+    method: 'POST',
+    path: '/api/authenticationTEA-CHER',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { username, password } = request.payload;
+        const responsedata = await Login.authentication.authenticationteacher(
+          username,
+          password,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // API VERIFY TOKEN JWT !! POST
   server.route({
     method: 'POST',
@@ -158,7 +165,7 @@ const init = async () => {
         const { token, tokenRole } = request.payload;
         const responsedata = await Login.authentication.verifyauthentication(
           token,
-          tokenRole
+          tokenRole,
         );
         return responsedata;
       } catch (err) {
@@ -183,9 +190,8 @@ const init = async () => {
     handler: async function (request, reply) {
       try {
         const { username } = request.payload;
-        const responsedata = await Login.authentication.Read_Frist_StudentByUsername(
-          username,
-        );
+        const responsedata =
+          await Login.authentication.Read_Frist_StudentByUsername(username);
         if (responsedata.error) {
           return responsedata.errMessage;
         } else {
@@ -198,7 +204,36 @@ const init = async () => {
       }
     },
   });
-
+// API READ firstname teacher POST
+server.route({
+  method: 'POST',
+  path: '/api/ReadTeacher',
+  config: {
+    payload: {
+      multipart: true,
+    },
+    cors: {
+      origin: ['*'],
+      additionalHeaders: ['cache-control', 'x-requested-width'],
+    },
+  },
+  handler: async function (request, reply) {
+    try {
+      const { username } = request.payload;
+      const responsedata =
+        await Login.authentication.Read_Frist_teacherByUsername(username);
+      if (responsedata.error) {
+        return responsedata.errMessage;
+      } else {
+        // console.log(responsedata.jwt);
+        return responsedata;
+      }
+    } catch (err) {
+      server.log(['error', 'home'], err);
+      return err;
+    }
+  },
+});
   //API upload file pdf
   server.route({
     method: 'POST',
@@ -243,7 +278,7 @@ const init = async () => {
           milliseconds,
           owner,
           year,
-          type
+          type,
         );
 
         if (responsedata.error) {
@@ -317,7 +352,7 @@ const init = async () => {
         }
         // Return a response after successful image upload
         return h.response(
-          'Images uploaded and inserted into the database successfully.'
+          'Images uploaded and inserted into the database successfully.',
         );
       } catch (err) {
         server.log(['error', 'home'], err);
@@ -399,7 +434,7 @@ const init = async () => {
         }
         // Return a response after successful image upload
         return h.response(
-          'Images uploaded and inserted into the database successfully.'
+          'Images uploaded and inserted into the database successfully.',
         );
       } catch (err) {
         server.log(['error', 'home'], err);
