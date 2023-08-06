@@ -17,6 +17,8 @@ const Satisfaction = require('./respository/Satisfaction');
 const Login = require('./respository/Portal/backend_login');
 const upload = require('./respository/Portal/uploadfile');
 const teacher = require('./respository/Portal/teacher');
+const student = require('./respository/Portal/Student');
+// --------------- env -----------------------------------
 const env = require('./env.js');
 //---------------- Websocket -----------------------------
 const hapiPort = 3200;
@@ -204,36 +206,67 @@ const init = async () => {
       }
     },
   });
-// API READ firstname teacher POST
-server.route({
-  method: 'POST',
-  path: '/api/ReadTeacher',
-  config: {
-    payload: {
-      multipart: true,
+  // API READ firstname teacher POST
+  server.route({
+    method: 'POST',
+    path: '/api/ReadTeacher',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
     },
-    cors: {
-      origin: ['*'],
-      additionalHeaders: ['cache-control', 'x-requested-width'],
-    },
-  },
-  handler: async function (request, reply) {
-    try {
-      const { username } = request.payload;
-      const responsedata =
-        await Login.authentication.Read_Frist_teacherByUsername(username);
-      if (responsedata.error) {
-        return responsedata.errMessage;
-      } else {
-        // console.log(responsedata.jwt);
-        return responsedata;
+    handler: async function (request, reply) {
+      try {
+        const { username } = request.payload;
+        const responsedata =
+          await Login.authentication.Read_Frist_teacherByUsername(username);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
       }
-    } catch (err) {
-      server.log(['error', 'home'], err);
-      return err;
-    }
-  },
-});
+    },
+  });
+  // API READ STUDENT WHERE RMUTL ID
+  server.route({
+    method: 'POST',
+    path: '/api/ReadStudentByUsername',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { username } = request.payload;
+        const responsedata = await student.student.ReadStudentByUsername(
+          username,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   //API upload file pdf
   server.route({
     method: 'POST',
@@ -493,7 +526,7 @@ server.route({
       }
     },
   });
-
+  // API InsertViewNew
   server.route({
     method: 'POST',
     path: '/api/InsertViewNew',
