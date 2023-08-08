@@ -55,7 +55,7 @@ async function authentication(username, password) {
   var Query;
   var pool = mysql.createPool(config);
   return new Promise((resolve, reject) => {
-    Query = `SELECT id_rmutl , brithday FROM biographical_student WHERE id_rmutl = '${username}' AND brithday = '${password}' `;
+    Query = `SELECT id_rmutl , birthday FROM biographical_student WHERE id_rmutl = '${username}' AND birthday = '${password}' `;
     console.log('Query1 is: ', Query);
     pool.query(Query, function (error, results) {
       if (results[0] !== undefined) {

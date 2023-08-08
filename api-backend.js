@@ -85,6 +85,42 @@ const init = async () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
     },
   });
+  // API UPDATE !!POST STUDENT
+  server.route({
+    method: 'POST',
+    path: '/api/UpdateStudent',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id, email, date, nationality, religion } = request.payload;
+
+        const responsedata = await student.student.Update_student(
+          id,
+          email,
+          date,
+          nationality,
+          religion,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // API SENT FROM LOGIN !!POST STUDENT
   server.route({
     method: 'POST',
@@ -325,7 +361,6 @@ const init = async () => {
       }
     },
   });
-
   //API GetfilePDF
   server.route({
     method: 'GET',
@@ -344,7 +379,6 @@ const init = async () => {
       }
     },
   });
-
   // API uploadmutipleimage max 4 form front-end
   server.route({
     method: 'POST',

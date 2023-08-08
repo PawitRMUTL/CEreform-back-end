@@ -27,6 +27,28 @@ async function ReadStudentByUsername(username) {
           return reject(error);
         } else {
           console.log('Read Student successfully');
+          console.log(results);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
+// Update_student
+async function Update_student(id, email, date, nationality, religion) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `UPDATE biographical_student SET
+      created = NOW(), email ="${email}" ,birthday = "${date}" ,nationality = "${nationality}", religion="${religion}" 
+       WHERE id_rmutl  = "${id}"  `,
+      function (error, results) {
+        if (error) {
+          console.error('Error  data:', error);
+          return reject(error);
+        } else {
+          console.log('UPDATE Student successfully');
           resolve(results);
         }
       },
@@ -36,4 +58,5 @@ async function ReadStudentByUsername(username) {
 
 module.exports.student = {
   ReadStudentByUsername: ReadStudentByUsername,
+  Update_student: Update_student,
 };
