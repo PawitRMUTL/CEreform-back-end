@@ -379,6 +379,57 @@ const init = async () => {
       }
     },
   });
+  // API uploadimageStudent
+  server.route({
+    method: 'POST',
+    path: '/api/uploadimageStudent',
+    config: {
+      payload: {
+        multipart: true,
+        parse: true,
+        output: 'stream',
+        allow: ['multipart/form-data', 'application/pdf'], // Specify the allowed content type for the request
+        maxBytes: 10 * 1024 * 1024, // Set a maximum file size (optional)
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, h) {
+      try {
+        const fs = require('fs');
+        let responsedata = [null];
+        const ownerid = request.payload['owner'];
+        // console.log('Payload:', request.payload);
+        for (const [fieldname, file] of Object.entries(request.payload)) {
+          if (file && file.hapi && file.hapi.filename) {
+            const filename = file.hapi.filename;
+            const data = file._data;
+            // Save the image file to disk (you can choose your desired destination)
+            const destinationPath = `/Users/baconinhell/Desktop/dandelion-pro_v25/starter-project/image/student/${filename}`;
+            const fileStream = fs.createWriteStream(destinationPath);
+            fileStream.write(data);
+            fileStream.end();
+
+            responsedata = upload.uploadfile.upload_image_stu_profile(
+              filename,
+              ownerid,
+            );
+          } else {
+            console.log('Invalid file object:', file);
+          }
+        }
+        // Return a response after successful image upload
+        return h.response(
+          'Images uploaded and inserted into the database successfully.',
+        );
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
   // API uploadmutipleimage max 4 form front-end
   server.route({
     method: 'POST',
@@ -407,7 +458,7 @@ const init = async () => {
             const filename = file.hapi.filename;
             const data = file._data;
             // Save the image file to disk (you can choose your desired destination)
-            const destinationPath = `../../../CEreform-frond-end/app/containers/ImageNew/${filename}`;
+            const destinationPath = `/Users/baconinhell/Desktop/dandelion-pro_v25/starter-project/image/ImageNew/${filename}`;
             const fileStream = fs.createWriteStream(destinationPath);
             fileStream.write(data);
             fileStream.end();

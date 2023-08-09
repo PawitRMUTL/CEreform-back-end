@@ -22,7 +22,7 @@ async function upload_pdf(filename, milliseconds, owner, year, type) {
           console.log('Upload successfully');
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -45,6 +45,27 @@ async function readfile() {
     });
   });
 }
+// upload_image_stu_profile
+async function upload_image_stu_profile(filename, ownerid) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // UPDATE `biographical_student` SET `image` = 'a' WHERE `biographical_student`.`student_id` = 1;
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `UPDATE  biographical_student SET image = "${filename}" WHERE id_rmutl = "${ownerid}" `,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Upload image successfully');
+          // console.log(resolve);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
 async function upload_image(filename, ownerid) {
   const unique_id = uuidv4();
   const pool = mysql.createPool(config);
@@ -65,7 +86,7 @@ async function upload_image(filename, ownerid) {
           // console.log(resolve);
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -134,7 +155,7 @@ async function update_image(data, ownerid) {
           // console.log(resolve);
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -155,7 +176,7 @@ async function read_NewDetaill(id) {
           // console.log(results);
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -177,7 +198,7 @@ async function read_ImageNewlist(id) {
           // console.log(results);
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -199,7 +220,7 @@ async function InsertViewNews(valuenew) {
           // console.log(results);
           resolve(results);
         }
-      }
+      },
     );
   });
 }
@@ -213,4 +234,5 @@ module.exports.uploadfile = {
   update_image: update_image,
   read_NewDetaill: read_NewDetaill,
   read_ImageNewlist: read_ImageNewlist,
+  upload_image_stu_profile: upload_image_stu_profile,
 };

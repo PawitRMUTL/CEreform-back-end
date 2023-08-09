@@ -27,7 +27,6 @@ async function ReadStudentByUsername(username) {
           return reject(error);
         } else {
           console.log('Read Student successfully');
-          console.log(results);
           resolve(results);
         }
       },
