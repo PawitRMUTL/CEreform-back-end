@@ -303,6 +303,68 @@ const init = async () => {
       }
     },
   });
+  // API READ TEACHER WHERE RMUTL ID
+  server.route({
+    method: 'POST',
+    path: '/api/ReadTeacherByEmail',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { email } = request.payload;
+        const responsedata = await teacher.teacher_detaill.thecher_listByEmail(
+          email,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // API READ EDUCATE TEACHER WHERE Id
+  server.route({
+    method: 'POST',
+    path: '/api/ReadEducateTeacherById',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        const responsedata = await teacher.teacher_detaill.ReadEducateTeacherById(
+          id,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   //API upload file pdf
   server.route({
     method: 'POST',
