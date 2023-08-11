@@ -6,7 +6,40 @@ const { v4: uuidv4 } = require('uuid');
 const uuid = uuidv4();
 const env = require('../../env.js');
 const config = require('../../dbconfig.js')[env];
-
+// Update_teacher
+async function Update_teacher(
+  id,
+  prefix,
+  date,
+  firstname,
+  lastname,
+  idrmutl,
+  email,
+  religion,
+  nationality,
+  phone,
+) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `UPDATE biographical_teacher SET prefix = "${prefix}", first_name = "${firstname}" , 
+      last_name = "${lastname}" , id_rmutl = "${idrmutl}" , _email = "${email}" , 
+      brithday = "${date}" , nationality = "${nationality}",_phone = "${phone}" , religion = "${religion}" ,
+       created = NOW() WHERE teacher_id = "${id}" `,
+      function (error, results) {
+        if (error) {
+          console.error('Error  data:', error);
+          return reject(error);
+        } else {
+          console.log('UPDATE Teacher successfully');
+          resolve(results);
+        }
+      },
+    );
+  });
+}
+// READ TEACHER
 async function thecher_list() {
   const unique_id = uuidv4();
   const pool = mysql.createPool(config);
@@ -117,4 +150,5 @@ module.exports.teacher_detaill = {
   T_Read_thecher_listById: T_Read_thecher_listById,
   thecher_listByEmail: thecher_listByEmail,
   ReadEducateTeacherById: ReadEducateTeacherById,
+  Update_teacher: Update_teacher,
 };

@@ -85,6 +85,56 @@ const init = async () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
     },
   });
+  // API UpdateTeacher !!POST TEACHER
+  server.route({
+    method: 'POST',
+    path: '/api/UpdateTeacher',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          id,
+          prefix,
+          date,
+          firstname,
+          lastname,
+          idrmutl,
+          email,
+          religion,
+          nationality,
+          phone,
+        } = request.payload;
+        const responsedata = await teacher.teacher_detaill.Update_teacher(
+          id,
+          prefix,
+          date,
+          firstname,
+          lastname,
+          idrmutl,
+          email,
+          religion,
+          nationality,
+          phone,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // API UPDATE !!POST STUDENT
   server.route({
     method: 'POST',
@@ -350,9 +400,8 @@ const init = async () => {
     handler: async function (request, reply) {
       try {
         const { id } = request.payload;
-        const responsedata = await teacher.teacher_detaill.ReadEducateTeacherById(
-          id,
-        );
+        const responsedata =
+          await teacher.teacher_detaill.ReadEducateTeacherById(id);
         if (responsedata.error) {
           return responsedata.errMessage;
         } else {
