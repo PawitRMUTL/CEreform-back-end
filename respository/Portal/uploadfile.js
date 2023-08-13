@@ -45,6 +45,28 @@ async function readfile() {
     });
   });
 }
+// upload_image_tea_profile
+async function upload_image_tea_profile(filename, ownerid) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  console.log('filename', filename, 'ownerid', ownerid);
+  // UPDATE  biographical_teacher SET _image = "${filename}" WHERE first_name = "${ownerid}"
+  return new Promise((resolve, reject) => {
+    pool.query(
+      ` UPDATE  biographical_teacher SET _image = "${filename}" WHERE first_name = "${ownerid}"`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Upload image Teacher successfully');
+          // console.log(resolve);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
 // upload_image_stu_profile
 async function upload_image_stu_profile(filename, ownerid) {
   const unique_id = uuidv4();
@@ -58,7 +80,7 @@ async function upload_image_stu_profile(filename, ownerid) {
           console.error('Error inserting data:', error);
           return reject(error);
         } else {
-          console.log('Upload image successfully');
+          console.log('Upload image Student successfully');
           // console.log(resolve);
           resolve(results);
         }
@@ -235,4 +257,5 @@ module.exports.uploadfile = {
   read_NewDetaill: read_NewDetaill,
   read_ImageNewlist: read_ImageNewlist,
   upload_image_stu_profile: upload_image_stu_profile,
+  upload_image_tea_profile: upload_image_tea_profile,
 };

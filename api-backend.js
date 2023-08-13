@@ -7,11 +7,11 @@ var express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 
-const AgentStatus = require('./respository/AgentStatus');
-const Inbound = require('./respository/Inbound');
-const Outbound = require('./respository/Outbound');
-const OnlineAgent = require('./respository/OnlineAgent');
-const Satisfaction = require('./respository/Satisfaction');
+// const AgentStatus = require('./respository/AgentStatus');
+// const Inbound = require('./respository/Inbound');
+// const Outbound = require('./respository/Outbound');
+// const OnlineAgent = require('./respository/OnlineAgent');
+// const Satisfaction = require('./respository/Satisfaction');
 
 //---------------- Portal --------------------------------
 const Login = require('./respository/Portal/backend_login');
@@ -83,6 +83,120 @@ const init = async () => {
     path: '/api/v1/',
     handler: () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
+    },
+  });
+  // API UpdateTeacher_education !! POST TEACHER
+  server.route({
+    method: 'POST',
+    path: '/api/UpdateTeacher_education',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          IDowner,
+          IDBachelor,
+          IDMaster,
+          IDDocter,
+          // Bachelor
+          BachelorCuriculum,
+          BachelorMajor,
+          BachelorYear,
+          BachelorUniversity,
+          // Master
+          MasterCuriculum,
+          MasterMajor,
+          MasterYear,
+          MasterUniversity,
+          // Doctor
+          DoctorCuriculum,
+          DoctorMajor,
+          DoctorYear,
+          DoctorUniversity,
+        } = request.payload;
+
+        const responsedata =
+          await teacher.teacher_detaill.Update_teacher_edutcation(
+            IDowner,
+            IDBachelor,
+            IDMaster,
+            IDDocter,
+            // Bachelor
+            BachelorCuriculum,
+            BachelorMajor,
+            BachelorYear,
+            BachelorUniversity,
+            // Master
+            MasterCuriculum,
+            MasterMajor,
+            MasterYear,
+            MasterUniversity,
+            // Doctor
+            DoctorCuriculum,
+            DoctorMajor,
+            DoctorYear,
+            DoctorUniversity,
+          );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // API UpdateTeacherSubject !!POST TEACHER
+  server.route({
+    method: 'POST',
+    path: '/api/UpdateTeacherSubject',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          id,
+          Subjectteach1,
+          Subjectteach2,
+          Subjectteach3,
+          Subjectteach4,
+          Subjectteach5,
+        } = request.payload;
+
+        const responsedata =
+          await teacher.teacher_detaill.Update_teacher_subject(
+            id,
+            Subjectteach1,
+            Subjectteach2,
+            Subjectteach3,
+            Subjectteach4,
+            Subjectteach5,
+          );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
     },
   });
   // API UpdateTeacher !!POST TEACHER
@@ -485,6 +599,56 @@ const init = async () => {
           return responseData;
         }
       } catch (error) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+  // API uploadimageTeacher
+  server.route({
+    method: 'POST',
+    path: '/api/uploadimageTeacher',
+    config: {
+      payload: {
+        multipart: true,
+        parse: true,
+        output: 'stream',
+        allow: ['multipart/form-data', 'application/pdf'], // Specify the allowed content type for the request
+        maxBytes: 10 * 1024 * 1024, // Set a maximum file size (optional)
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, h) {
+      try {
+        const fs = require('fs');
+        let responsedata = [null];
+        const ownerid = request.payload['owner'];
+        // console.log('ownerid:', ownerid);
+        for (const [fieldname, file] of Object.entries(request.payload)) {
+          if (file && file.hapi && file.hapi.filename) {
+            const filename = file.hapi.filename;
+            const data = file._data;
+            // Save the image file to disk (you can choose your desired destination)
+            const destinationPath = `/Users/baconinhell/Desktop/dandelion-pro_v25/starter-project/image/teacher/${filename}`;
+            const fileStream = fs.createWriteStream(destinationPath);
+            fileStream.write(data);
+            fileStream.end();
+            responsedata = upload.uploadfile.upload_image_tea_profile(
+              filename,
+              ownerid,
+            );
+          } else {
+            console.log('Invalid file object:', file);
+          }
+        }
+        // Return a response after successful image upload
+        return h.response(
+          'Images uploaded and inserted into the database successfully.',
+        );
+      } catch (err) {
         server.log(['error', 'home'], err);
         throw err; // Throw the error to indicate a failure
       }
