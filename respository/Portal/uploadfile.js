@@ -224,7 +224,31 @@ async function read_ImageNewlist(id) {
     );
   });
 }
+// addNewsViewByID
+async function addNewsViewByID(Id, View) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
+  console.log('id : ', Id);
+  console.log('view :', View);
 
+  return new Promise((resolve, reject) => {
+    //
+    pool.query(
+      `UPDATE newspaper SET view = '${View}' WHERE news_id = '${Id}'`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Add View_News successfully');
+          // console.log(results);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
 async function InsertViewNews(valuenew) {
   const unique_id = uuidv4();
   const pool = mysql.createPool(config);
@@ -258,4 +282,5 @@ module.exports.uploadfile = {
   read_ImageNewlist: read_ImageNewlist,
   upload_image_stu_profile: upload_image_stu_profile,
   upload_image_tea_profile: upload_image_tea_profile,
+  addNewsViewByID: addNewsViewByID,
 };

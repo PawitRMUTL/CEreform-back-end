@@ -754,6 +754,36 @@ const init = async () => {
     },
   });
 
+  // API addNewsViewByID
+  server.route({
+    method: 'POST',
+    path: '/api/addNewsViewByID',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { Id, View } = request.payload;
+
+        const responsedata = await upload.uploadfile.addNewsViewByID(Id, View);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   //API GetfilePDF
   server.route({
     method: 'GET',
