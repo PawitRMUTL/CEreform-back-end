@@ -115,7 +115,7 @@ async function Read_Frist_teacherByUsername(username) {
 
   return new Promise((resolve, reject) => {
     pool.query(
-      `SELECT first_name , _image FROM biographical_teacher WHERE _email = "${username}"`,
+      `SELECT first_name ,last_name, _image FROM biographical_teacher WHERE _email = "${username}"`,
       function (error, results) {
         if (error) {
           console.error('Error inserting data:', error);

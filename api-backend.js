@@ -18,6 +18,8 @@ const Login = require('./respository/Portal/backend_login');
 const upload = require('./respository/Portal/uploadfile');
 const teacher = require('./respository/Portal/teacher');
 const student = require('./respository/Portal/Student');
+const report = require('./respository/Portal/Report');
+const news = require('./respository/Portal/news');
 // --------------- env -----------------------------------
 const env = require('./env.js');
 //---------------- Websocket -----------------------------
@@ -83,6 +85,81 @@ const init = async () => {
     path: '/api/v1/',
     handler: () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
+    },
+  });
+  // ReadTeacherAndImage
+  server.route({
+    method: 'POST',
+    path: '/api/ReadNewsAndImage',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        console.log(id);
+        const responsedata = await news.news.Read_news_and_image_Byid(id);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // API Add graduate_report
+  server.route({
+    method: 'POST',
+    path: '/api/addReport_graduate',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          SelecteCooperative,
+          SelecteCooperativePhone,
+          SelectePrefix,
+          SelecteFirst,
+          SelecteLast,
+          SelecteCooperativeTopic,
+          SelecteCooperativeContent,
+        } = request.payload;
+        const responsedata = await report.report.Report_graduate(
+          SelecteCooperative,
+          SelecteCooperativePhone,
+          SelectePrefix,
+          SelecteFirst,
+          SelecteLast,
+          SelecteCooperativeTopic,
+          SelecteCooperativeContent,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
     },
   });
   // API UpdateTeacher_education !! POST TEACHER

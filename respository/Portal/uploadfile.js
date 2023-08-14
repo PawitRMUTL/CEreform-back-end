@@ -120,7 +120,7 @@ async function read_Newlist() {
   return new Promise((resolve, reject) => {
     Query = 'SELECT * FROM newspaper';
     Query2 =
-      'SELECT * FROM newspaper INNER JOIN newspaper_image ON newspaper.news_id = newspaper_image.ownerid WHERE newspaper_image.imageMain = 1 ';
+      'SELECT * FROM newspaper INNER JOIN newspaper_image ON newspaper.news_id = newspaper_image.ownerid WHERE newspaper_image.imageMain = 1 AND isDeleted = 0 ';
     console.log('Query is: ', Query2);
     pool.query(Query2, function (error, results) {
       if (error) {
