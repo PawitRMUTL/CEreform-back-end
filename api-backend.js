@@ -87,6 +87,79 @@ const init = async () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
     },
   });
+  // DeleteNews
+  server.route({
+    method: 'POST',
+    path: '/api/DeleteNews',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { id } = request.payload;
+        console.log(id);
+        const responsedata = await news.news.delete_news_byId(id);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // API UpdateNews !!POST News
+  server.route({
+    method: 'POST',
+    path: '/api/UpdatenewsByid',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          Newsid,
+          Newsname,
+          Newsdate,
+          Newscontent,
+          Newscontent2,
+          Newsheading,
+          Createby,
+        } = request.payload;
+        const responsedata = await news.news.Update_news_By_id(
+          Newsid,
+          Newsname,
+          Newsdate,
+          Newscontent,
+          Newscontent2,
+          Newsheading,
+          Createby,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // ReadTeacherAndImage
   server.route({
     method: 'POST',
