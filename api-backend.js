@@ -87,6 +87,48 @@ const init = async () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
     },
   });
+  // AddnewsByid
+  server.route({
+    method: 'POST',
+    path: '/api/Addnews',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const {
+          Newsname,
+          Newsdate,
+          Newscontent,
+          Newscontent2,
+          Newsheading,
+          Createby,
+        } = request.payload;
+        const responsedata = await news.news.Adds_news(
+          Newsname,
+          Newsdate,
+          Newscontent,
+          Newscontent2,
+          Newsheading,
+          Createby,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // DeleteNews
   server.route({
     method: 'POST',
@@ -934,7 +976,27 @@ const init = async () => {
       }
     },
   });
-  //API GetfilePDF
+  //API GetNewlist
+  server.route({
+    method: 'GET',
+    path: '/api/GetNews',
+    handler: async function (reply) {
+      try {
+        const responseData = await news.news.ReadNews();
+        // console.log('responseData is ', responseData);
+
+        if (responseData.error) {
+          return responseData.errMessage;
+        } else {
+          return responseData;
+        }
+      } catch (error) {
+        server.log(['error', 'home'], err);
+        throw err; // Throw the error to indicate a failure
+      }
+    },
+  });
+  //API GetNewlist
   server.route({
     method: 'GET',
     path: '/api/GetNewlist',

@@ -91,8 +91,57 @@ async function delete_news_byId(id) {
     );
   });
 }
+// Adds_news
+async function Adds_news(
+  Newsname,
+  Newsdate,
+  Newscontent,
+  Newscontent2,
+  Newsheading,
+  Createby,
+) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `INSERT INTO newspaper(news_name, news_date, news_heading, news_content, news_content2, created_by , lsedited,isDeleted,view) VALUES('${Newsname}', '${Newsdate}', '${Newsheading}', '${Newscontent}', '${Newscontent2}', '${Createby}' , NOW(),0,'0')`,
+      function (error, results) {
+        if (error) {
+          console.error('Error Adds data:', error);
+          return reject(error);
+        } else {
+          console.log('Adds news successfully');
+          // console.log(resolve);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
+// ReadNews
+async function ReadNews() {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  return new Promise((resolve, reject) => {
+    pool.query(
+      'SELECT * FROM newspaper WHERE isDeleted = 0',
+      function (error, results) {
+        if (error) {
+          console.error('Error Adds data:', error);
+          return reject(error);
+        } else {
+          console.log('Adds news successfully');
+          // console.log(resolve);
+          resolve(results);
+        }
+      },
+    );
+  });
+}
 module.exports.news = {
   Read_news_and_image_Byid: Read_news_and_image_Byid,
   Update_news_By_id: Update_news_By_id,
   delete_news_byId: delete_news_byId,
+  Adds_news: Adds_news,
+  ReadNews: ReadNews,
 };
