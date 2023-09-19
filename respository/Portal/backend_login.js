@@ -21,7 +21,7 @@ async function authenticationteacher(username, password) {
     console.log('Query1 is: ', Query);
     pool.query(Query, function (error, results) {
       if (results[0] !== undefined) {
-        console.log('results is', results[0]);
+        // console.log('results is', results[0]);
         const userRole = 'อาจารย์';
         var token = jwt.sign(
           { data: username, iat: Math.floor(Date.now() / 1000) - 30 },
@@ -59,7 +59,7 @@ async function authentication(username, password) {
     console.log('Query1 is: ', Query);
     pool.query(Query, function (error, results) {
       if (results[0] !== undefined) {
-        console.log('results is', results[0]);
+        // console.log('results is', results[0]);
         const userRole = 'นักศึกษา';
         var token = jwt.sign(
           { data: username, iat: Math.floor(Date.now() / 1000) - 30 },
@@ -134,7 +134,7 @@ async function verifyauthentication(token, tokenRole) {
   try {
     jwt.verify(token, 'jwt_secret', function (err, decoded) {
       username = decoded.data;
-      console.log('username' + decoded.data);
+      console.log('username Decode from jwt: ' + decoded.data);
     });
     jwt.verify(tokenRole, 'jwt_secret_role', function (err, decoded) {
       role = decoded.dataRole;

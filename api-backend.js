@@ -20,6 +20,7 @@ const teacher = require('./respository/Portal/teacher');
 const student = require('./respository/Portal/Student');
 const report = require('./respository/Portal/Report');
 const news = require('./respository/Portal/news');
+const dashboard = require('./respository/Portal/dashborad');
 // --------------- env -----------------------------------
 const env = require('./env.js');
 //---------------- Websocket -----------------------------
@@ -55,11 +56,6 @@ app.use('/', router);
 //use cookieParser
 app.use(cookie());
 
-//use file with express
-// app.use(fileupload());
-// app.use(express.static('files'));
-
-//add middleware for static content
 app.use(express.static('static'));
 var webserver = app.listen(webPort, function () {
   console.log('Websockets listening on port: ' + webSocketPort);
@@ -85,6 +81,60 @@ const init = async () => {
     path: '/api/v1/',
     handler: () => {
       return '<h3> Welcome to CE Reform API V1.0.0</h3>';
+    },
+  });
+  // Read_report
+  server.route({
+    method: 'POST',
+    path: '/api/Read_report',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const responsedata = await dashboard.dashboard.dashboard_Read_report();
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // dashboard
+  server.route({
+    method: 'POST',
+    path: '/api/dashboard',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const responsedata = await dashboard.dashboard.dashboard();
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
     },
   });
   // AddnewsByid
