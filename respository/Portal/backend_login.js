@@ -13,6 +13,44 @@ const uuid = uuidv4();
 const env = require('../../env.js');
 const config = require('../../dbconfig.js')[env];
 // API authenticationteacher
+async function authenticationadmin(username, password) {
+  var Query;
+  var pool = mysql.createPool(config);
+  return new Promise((resolve, reject) => {
+    Query = `SELECT off_user , off_pass FROM officer WHERE off_user = '${username}' AND off_pass = '${password}' `;
+    console.log('Query1 is: ', Query);
+    pool.query(Query, function (error, results) {
+      if (results[0] !== undefined) {
+        // console.log('results is', results[0]);
+        const userRole = 'admin';
+        var token = jwt.sign(
+          { data: username, iat: Math.floor(Date.now() / 1000) - 30 },
+          'jwt_secret',
+        );
+        // console.log('tokenUser : ' + token);
+        var tokenRole = jwt.sign(
+          { dataRole: userRole, iat: Math.floor(Date.now() / 1000) - 30 },
+          'jwt_secret_role',
+        );
+        // console.log('tokenUserRole : ' + tokenRole);
+        pool.end();
+        return resolve({
+          statusCode: 200,
+          returnCode: 1,
+          jwt: token,
+          jwtRole: tokenRole,
+        });
+      } else {
+        pool.end();
+        return resolve({
+          statusCode: 404,
+          returnCode: 11,
+        });
+      }
+    });
+  });
+}
+// API authenticationteacher
 async function authenticationteacher(username, password) {
   var Query;
   var pool = mysql.createPool(config);
@@ -88,6 +126,27 @@ async function authentication(username, password) {
     });
   });
 }
+// Read_Frist_adminByUsername
+async function Read_Frist_adminByUsername(username) {
+  const unique_id = uuidv4();
+  const pool = mysql.createPool(config);
+  // console.log('data1 is', data);
+
+  return new Promise((resolve, reject) => {
+    pool.query(
+      `SELECT off_name FROM officer WHERE off_user = "${username}"`,
+      function (error, results) {
+        if (error) {
+          console.error('Error inserting data:', error);
+          return reject(error);
+        } else {
+          console.log('Read FristName successfully');
+          resolve(results);
+        }
+      },
+    );
+  });
+}
 async function Read_Frist_StudentByUsername(username) {
   const unique_id = uuidv4();
   const pool = mysql.createPool(config);
@@ -156,4 +215,6 @@ module.exports.authentication = {
   Read_Frist_StudentByUsername: Read_Frist_StudentByUsername,
   authenticationteacher: authenticationteacher,
   Read_Frist_teacherByUsername: Read_Frist_teacherByUsername,
+  authenticationadmin: authenticationadmin,
+  Read_Frist_adminByUsername: Read_Frist_adminByUsername,
 };

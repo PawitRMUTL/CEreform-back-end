@@ -559,6 +559,38 @@ const init = async () => {
       }
     },
   });
+  // API SENT FROM LOGIN !!POST ADMIN
+  server.route({
+    method: 'POST',
+    path: '/api/authenticationadmin',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { username, password } = request.payload;
+        const responsedata = await Login.authentication.authenticationadmin(
+          username,
+          password,
+        );
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
   // API SENT FROM LOGIN !!POST TEACHER
   server.route({
     method: 'POST',
@@ -612,6 +644,36 @@ const init = async () => {
           tokenRole,
         );
         return responsedata;
+      } catch (err) {
+        server.log(['error', 'home'], err);
+        return err;
+      }
+    },
+  });
+  // API READ name admin POST
+  server.route({
+    method: 'POST',
+    path: '/api/ReadAdmin',
+    config: {
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width'],
+      },
+    },
+    handler: async function (request, reply) {
+      try {
+        const { username } = request.payload;
+        const responsedata =
+          await Login.authentication.Read_Frist_adminByUsername(username);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          // console.log(responsedata.jwt);
+          return responsedata;
+        }
       } catch (err) {
         server.log(['error', 'home'], err);
         return err;
