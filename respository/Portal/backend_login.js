@@ -58,7 +58,8 @@ async function authenticationteacher(username, password) {
     Query = `SELECT id_rmutl , _email FROM biographical_teacher WHERE _email = '${username}' AND id_rmutl = '${password}' `;
     console.log('Query1 is: ', Query);
     pool.query(Query, function (error, results) {
-      if (results[0] !== undefined) {
+      if (results !== undefined) {
+        console.log(results);
         // console.log('results is', results[0]);
         const userRole = 'อาจารย์';
         var token = jwt.sign(
@@ -79,6 +80,7 @@ async function authenticationteacher(username, password) {
           jwtRole: tokenRole,
         });
       } else {
+        console.log(error);
         pool.end();
         return resolve({
           statusCode: 404,
